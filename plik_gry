@@ -1,0 +1,62 @@
+import pygame
+import os
+import random
+
+pygame.init()
+
+szer = 600
+wys = 600
+screen = pygame.display.set_mode((szer,wys))#dotycza okna i jego rozmiaru
+
+def napisz(tekst, x, y, rozmiar):
+    cz= pygame.font.SysFont("Arial", rozmiar)  #tworzymy obiekt czyli czcionka
+    rend = cz.render(tekst, 1, (255,100,100))# renderuje napis, 1 zaokragl
+                                             # krawedzie, cyferki to kolory GRB
+    x = int(szer - rend.get_rect().width) /2  #wysrodkowuje tekst w poziomie
+    y = int(szer - rend.get_rect().height) /2 #jw w pionie
+    screen.blit(rend,(x,y)) #umieszcza tekst w oknie graficznym
+
+copokazuje = "rozgrywka"
+
+class Przeszkoda():
+    def __init__(self, x, szerokosc): #s. 34, 35 self - odnosi sie do samego sb
+        self.x=x
+        self.szerokosc=szerokosc
+        self.y_gora = 0
+        self.wys_gora = random.randint(150,250) #ile wysokosci bd mial gorny prostokat
+        self.odstep = 200 # odstep miedzy gornym a dolnym
+        self.y_dol = self.wys_gora + self.odstep # na jakiej wysokosci zacznie sie dolny prostokat
+        self.wys_dol = wys - self.y_dol #ile wysokosci bedzie mial dolny prostokat 
+        self.kolor = (160, 140, 190) #kolor przeszkod
+        self.ksztalt_gora = pygame.Rect(self.x, self.y_gora, self.szerokosc, self.wys_gora) #prostokat(x,y,szer,wys)
+        self.ksztalt_dol = pygame.Rect(self.x, self.y_dol, self.szerokosc, self.wys_dol)#prostokat dolny i jego wymiary
+
+    def rysuj(self):
+        pygame.draw.rect(screen, self.kolor, self.ksztalt_gora, 0) #s.38 rysuj prostokaty(ekran,kolor,ksztalt,grubosc krawedz)
+        pygame.draw.rect(screen, self.kolor, self.ksztalt_dol, 0)#rysuj dolny prostokat
+        
+    def ruch(self,v)
+        self.x = self.x - v
+        self.ksztalt_gora = pygame.Rect(self.x, self.y_gora, self.szerokosc, self.wys_gora)
+        self.ksztalt_dol = pygame.Rect(self.x, self.y_dol, self,szerokosc, self.wys_dol)
+        
+przeszkody = []             #tablica w ktorej beda zapisane pojedyncze prostokaty
+for i in range (21):        # na raz bedzie 20 prostokatow na ekranie
+    przeszkody.append(Przeszkoda(i*szer/20,szer/20)) #przeszkody sie beda dodawac tutaj
+    
+
+while True:                           #PETLA GLOWNA PROGRAMU
+    for event in pygame.event.get():  # dla kazdego zdarzena na liscie zdarzen
+        if event.type == pygame.QUIT: #jesli typ zdarzenia to quit
+            pygame.quit()             # wyjdz z okna
+            quit()                    # i zamknij idla
+            
+    if copokazuje == "menu":
+        napisz("Nacisnij SPACJA aby rozpoczac",0,0,30)#80x 150y,20rozmiar czcionki
+        grafika = pygame.image.load(os.path.join('BluePanoramapiksel.png'))
+        screen.blit(grafika,(0,30))
+    elif copokazuje == "rozgrywka":
+        for p in przeszkody:
+            p.rysuj()
+            
+    pygame.display.update()#odswiezanie ekranu, stosowac zawsze
